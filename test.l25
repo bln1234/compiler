@@ -1,0 +1,6 @@
+program myApp {
+    main {
+        let a = 1;
+        output(1+2,2,a);
+    }
+}
