@@ -93,10 +93,11 @@ typedef union YYSTYPE
     int num;
     char *id;
     char *str;
+    std::vector<int>* numlist;
 
 
 /* Line 2058 of yacc.c  */
-#line 100 "l25.tab.hpp"
+#line 101 "l25.tab.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

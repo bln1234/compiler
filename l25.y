@@ -4,8 +4,8 @@
 #include <fstream>
 #include <cstdlib>
 #include <cstring>
-#include <SymbolTable.hpp>
-#include <VM.hpp>
+#include "SymbolTable.hpp"
+#include "VM.hpp"
 
 void yyerror(const char *s);
 int yylex(void);
@@ -22,8 +22,10 @@ int addressOffset = 0;  // 当前作用域内的偏移地址
     int num;
     char *id;
     char *str;
+    std::vector<int>* numlist;
 }
-
+%type <numlist> number_list
+%type <num> expr factor term
 %token <num> NUMBER
 %token <id> IDENT
 %token PROGRAM FUNC MAIN RETURN LET IF ELSE WHILE INPUT OUTPUT STRUCT_DEF STRUCT
@@ -125,11 +127,44 @@ struct_init_list:
 
 array_declare_stmt:
     LBRACKET NUMBER RBRACKET IDENT ASSIGN LBRACE number_list RBRACE
+    {
+        int length = $2;
+        char* name = $4;
+        std::vector<int>* vals = $7;
+
+        // 1. 检查数组长度是否匹配
+        if ((int)vals->size() != length) {
+            fprintf(stderr, "数组初始化长度与声明长度不匹配: %s\n", name);
+            exit(1);
+        }
+
+        // 2. 向符号表添加数组符号
+        Symbol sym(name, SymbolKind::ARRAY, ValueType::Integer, level, symtab.allocateAddress(), length);
+        symtab.addSymbol(sym);
+
+        // 3. 生成初始化数组的p-code
+        int baseAddr = sym.address;
+        for (int i = 0; i < length; ++i) {
+            code.push_back(Instruction(lit, 0, (*vals)[i])); 
+            code.push_back(Instruction(sto, 0, baseAddr + i));
+        }
+
+        // 4. 释放临时vector
+        delete vals;
+    }
     ;
 
 number_list:
     NUMBER
+    {
+        $$ = new std::vector<int>();
+        $$->push_back($1);
+    }
     | number_list COMMA NUMBER
+    {
+        $$ = $1;
+        $$->push_back($3);
+    }
     ;
 
 declare_stmt:
@@ -149,8 +184,6 @@ declare_stmt:
 
 assign_stmt:
     lvalue ASSIGN expr
-    {
-    }
     ;
 
 lvalue:
@@ -247,6 +280,9 @@ bool_expr:
 expr:
     PLUS term
     | MINUS term
+    {
+        code.push_back(Instruction(opr, 0, 1)); //取负
+    }
     | term
     | expr PLUS term
     {
@@ -273,7 +309,26 @@ term:
 factor:
     IDENT
     | IDENT DOT IDENT                          { printf("Struct member access: %s.%s\n", $1, $3); }
-    | IDENT LBRACKET expr RBRACKET             { printf("Array access: %s[...]\n", $1); }
+    | IDENT LBRACKET expr RBRACKET
+    {
+        Symbol* sym = symtab.findSymbol($1);
+        if (!sym) {
+            fprintf(stderr, "未定义的数组变量: %s\n", $1);
+            exit(1);
+        }
+        if (sym->kind != SymbolKind::ARRAY) {
+            fprintf(stderr, "变量 %s 不是数组类型\n", $1);
+            exit(1);
+        }
+        // 生成数组访问的 p-code
+        // 假设 expr 的结果已经在栈顶
+        // 加载数组基地址
+        code.push_back(Instruction(lit, 0, sym->address));
+        // 加上索引
+        code.push_back(Instruction(opr, 0, 2)); // 加法
+        // 加载数组元素的值
+        code.push_back(Instruction(lod, sym->level, 0));
+    }
     | NUMBER
     {
         code.push_back(Instruction(lit, 0, $1));

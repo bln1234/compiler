@@ -1,6 +1,6 @@
 #ifndef SYMBOL_TABLE_HPP
 #define SYMBOL_TABLE_HPP
-#pragma once
+
 #include <string>
 #include <vector>
 #include <utility>

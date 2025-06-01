@@ -1,6 +1,7 @@
 program myApp {
     main {
         let a = 1;
-        output(1+2,2,a);
+        [5] b = {1,2,3,4,5};
+        output(-2,1+2,2,a);
     }
 }

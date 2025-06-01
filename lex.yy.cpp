@@ -498,9 +498,10 @@ char *yytext;
 #line 1 "l25.lex"
 #line 3 "l25.lex"
 #include <cstdio>
+#include <vector>
 #include "l25.tab.hpp"
-#line 502 "lex.yy.cpp"
 #line 503 "lex.yy.cpp"
+#line 504 "lex.yy.cpp"
 
 #define INITIAL 0
 
@@ -715,10 +716,10 @@ YY_DECL
 		}
 
 	{
-#line 7 "l25.lex"
+#line 8 "l25.lex"
 
 
-#line 721 "lex.yy.cpp"
+#line 722 "lex.yy.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -777,191 +778,191 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 9 "l25.lex"
+#line 10 "l25.lex"
 { return PROGRAM; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 10 "l25.lex"
+#line 11 "l25.lex"
 { return FUNC; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 11 "l25.lex"
+#line 12 "l25.lex"
 { return MAIN; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 12 "l25.lex"
+#line 13 "l25.lex"
 { return RETURN; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 13 "l25.lex"
+#line 14 "l25.lex"
 { return LET; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 14 "l25.lex"
+#line 15 "l25.lex"
 { return IF; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 15 "l25.lex"
+#line 16 "l25.lex"
 { return ELSE; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 16 "l25.lex"
+#line 17 "l25.lex"
 { return WHILE; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 17 "l25.lex"
+#line 18 "l25.lex"
 { return INPUT; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 18 "l25.lex"
+#line 19 "l25.lex"
 { return OUTPUT; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 19 "l25.lex"
+#line 20 "l25.lex"
 { return STRUCT_DEF; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 20 "l25.lex"
+#line 21 "l25.lex"
 { return STRUCT; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 22 "l25.lex"
+#line 23 "l25.lex"
 { return EQ; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 23 "l25.lex"
+#line 24 "l25.lex"
 { return NEQ; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 24 "l25.lex"
+#line 25 "l25.lex"
 { return LEQ; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 25 "l25.lex"
+#line 26 "l25.lex"
 { return GEQ; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 26 "l25.lex"
+#line 27 "l25.lex"
 { return LT; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 27 "l25.lex"
+#line 28 "l25.lex"
 { return GT; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 29 "l25.lex"
+#line 30 "l25.lex"
 { return ASSIGN; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 30 "l25.lex"
+#line 31 "l25.lex"
 { return PLUS; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 31 "l25.lex"
+#line 32 "l25.lex"
 { return MINUS; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 32 "l25.lex"
+#line 33 "l25.lex"
 { return MUL; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 33 "l25.lex"
+#line 34 "l25.lex"
 { return DIV; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 35 "l25.lex"
+#line 36 "l25.lex"
 { return LPAREN; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 36 "l25.lex"
+#line 37 "l25.lex"
 { return RPAREN; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 37 "l25.lex"
+#line 38 "l25.lex"
 { return LBRACKET; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 38 "l25.lex"
+#line 39 "l25.lex"
 { return RBRACKET; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 39 "l25.lex"
+#line 40 "l25.lex"
 { return LBRACE; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 40 "l25.lex"
+#line 41 "l25.lex"
 { return RBRACE; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 41 "l25.lex"
+#line 42 "l25.lex"
 { return COMMA; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 42 "l25.lex"
+#line 43 "l25.lex"
 { return SEMICOLON; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 43 "l25.lex"
+#line 44 "l25.lex"
 {return DOT; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 45 "l25.lex"
+#line 46 "l25.lex"
 { yylval.num = atoi(yytext); return NUMBER; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 46 "l25.lex"
+#line 47 "l25.lex"
 { yylval.id = strdup(yytext); return IDENT; }
 	YY_BREAK
 case 35:
 /* rule 35 can match eol */
 YY_RULE_SETUP
-#line 48 "l25.lex"
+#line 49 "l25.lex"
 { /* 忽略空白 */ }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 49 "l25.lex"
+#line 50 "l25.lex"
 { printf("Unrecognized character: %s\n", yytext); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 51 "l25.lex"
+#line 52 "l25.lex"
 ECHO;
 	YY_BREAK
-#line 964 "lex.yy.cpp"
+#line 965 "lex.yy.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1929,7 +1930,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 51 "l25.lex"
+#line 52 "l25.lex"
 
 
 int yywrap(void) {

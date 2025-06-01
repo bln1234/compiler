@@ -1,6 +1,6 @@
 #ifndef VM_H
 #define VM_H
-#pragma once
+
 #include <vector>
 #include <iostream>
 

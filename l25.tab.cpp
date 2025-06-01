@@ -70,8 +70,8 @@
 #include <fstream>
 #include <cstdlib>
 #include <cstring>
-#include <SymbolTable.hpp>
-#include <VM.hpp>
+#include "SymbolTable.hpp"
+#include "VM.hpp"
 
 void yyerror(const char *s);
 int yylex(void);
@@ -167,10 +167,11 @@ typedef union YYSTYPE
     int num;
     char *id;
     char *str;
+    std::vector<int>* numlist;
 
 
 /* Line 387 of yacc.c  */
-#line 174 "l25.tab.cpp"
+#line 175 "l25.tab.cpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -198,7 +199,7 @@ int yyparse ();
 /* Copy the second part of user declarations.  */
 
 /* Line 390 of yacc.c  */
-#line 202 "l25.tab.cpp"
+#line 203 "l25.tab.cpp"
 
 #ifdef short
 # undef short
@@ -522,14 +523,14 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    37,    37,    43,    45,    49,    55,    57,    60,    62,
-      66,    71,    79,    78,    89,    90,    94,    95,    99,   100,
-     101,   102,   103,   104,   105,   106,   107,   111,   115,   122,
-     123,   127,   131,   132,   136,   141,   151,   157,   158,   159,
-     163,   164,   168,   175,   182,   189,   193,   200,   201,   205,
-     209,   216,   217,   221,   225,   229,   233,   237,   241,   248,
-     249,   250,   251,   255,   262,   266,   270,   274,   275,   276,
-     277,   281,   282,   287,   286
+       0,    39,    39,    45,    47,    51,    57,    59,    62,    64,
+      68,    73,    81,    80,    91,    92,    96,    97,   101,   102,
+     103,   104,   105,   106,   107,   108,   109,   113,   117,   124,
+     125,   129,   158,   163,   171,   176,   186,   193,   194,   195,
+     199,   200,   204,   211,   218,   225,   229,   236,   237,   241,
+     245,   252,   253,   257,   261,   265,   269,   273,   277,   284,
+     285,   289,   290,   294,   301,   305,   309,   313,   314,   315,
+     335,   339,   340,   345,   344
 };
 #endif
 
@@ -1535,7 +1536,7 @@ yyreduce:
     {
         case 2:
 /* Line 1792 of yacc.c  */
-#line 38 "l25.y"
+#line 40 "l25.y"
     {
         code[0].a = mainEntryIndex;
     }
@@ -1543,7 +1544,7 @@ yyreduce:
 
   case 5:
 /* Line 1792 of yacc.c  */
-#line 50 "l25.y"
+#line 52 "l25.y"
     {
         printf("Struct definition: %s\n", (yyvsp[(2) - (6)].id));
     }
@@ -1551,7 +1552,7 @@ yyreduce:
 
   case 10:
 /* Line 1792 of yacc.c  */
-#line 67 "l25.y"
+#line 69 "l25.y"
     {
         // 添加函数信息到符号表
     
@@ -1560,7 +1561,7 @@ yyreduce:
 
   case 11:
 /* Line 1792 of yacc.c  */
-#line 72 "l25.y"
+#line 74 "l25.y"
     {
         printf("Parsed function without param: %s\n", (yyvsp[(2) - (10)].id));
     }
@@ -1568,7 +1569,7 @@ yyreduce:
 
   case 12:
 /* Line 1792 of yacc.c  */
-#line 79 "l25.y"
+#line 81 "l25.y"
     {
         mainEntryIndex = code.size();
     }
@@ -1576,7 +1577,7 @@ yyreduce:
 
   case 13:
 /* Line 1792 of yacc.c  */
-#line 83 "l25.y"
+#line 85 "l25.y"
     {
         code.push_back(Instruction(jmp, 0, 0));
     }
@@ -1584,7 +1585,7 @@ yyreduce:
 
   case 27:
 /* Line 1792 of yacc.c  */
-#line 112 "l25.y"
+#line 114 "l25.y"
     {
         
     }
@@ -1592,15 +1593,63 @@ yyreduce:
 
   case 28:
 /* Line 1792 of yacc.c  */
-#line 116 "l25.y"
+#line 118 "l25.y"
     {
         printf("Declare struct variable: %s of type %s\n", (yyvsp[(3) - (3)].id), (yyvsp[(2) - (3)].id));
     }
     break;
 
+  case 31:
+/* Line 1792 of yacc.c  */
+#line 130 "l25.y"
+    {
+        int length = (yyvsp[(2) - (8)].num);
+        char* name = (yyvsp[(4) - (8)].id);
+        std::vector<int>* vals = (yyvsp[(7) - (8)].numlist);
+
+        // 1. 检查数组长度是否匹配
+        if ((int)vals->size() != length) {
+            fprintf(stderr, "数组初始化长度与声明长度不匹配: %s\n", name);
+            exit(1);
+        }
+
+        // 2. 向符号表添加数组符号
+        Symbol sym(name, SymbolKind::ARRAY, ValueType::Integer, level, symtab.allocateAddress(), length);
+        symtab.addSymbol(sym);
+
+        // 3. 生成初始化数组的p-code
+        int baseAddr = sym.address;
+        for (int i = 0; i < length; ++i) {
+            code.push_back(Instruction(lit, 0, (*vals)[i])); 
+            code.push_back(Instruction(sto, 0, baseAddr + i));
+        }
+
+        // 4. 释放临时vector
+        delete vals;
+    }
+    break;
+
+  case 32:
+/* Line 1792 of yacc.c  */
+#line 159 "l25.y"
+    {
+        (yyval.numlist) = new std::vector<int>();
+        (yyval.numlist)->push_back((yyvsp[(1) - (1)].num));
+    }
+    break;
+
+  case 33:
+/* Line 1792 of yacc.c  */
+#line 164 "l25.y"
+    {
+        (yyval.numlist) = (yyvsp[(1) - (3)].numlist);
+        (yyval.numlist)->push_back((yyvsp[(3) - (3)].num));
+    }
+    break;
+
   case 34:
 /* Line 1792 of yacc.c  */
-#line 137 "l25.y"
+#line 172 "l25.y"
     {
         int addr = symtab.allocateAddress();
         symtab.addSymbol(Symbol((yyvsp[(2) - (2)].id), SymbolKind::Variable, ValueType::Integer, level, addr));
@@ -1609,7 +1658,7 @@ yyreduce:
 
   case 35:
 /* Line 1792 of yacc.c  */
-#line 142 "l25.y"
+#line 177 "l25.y"
     {
         int addr = symtab.allocateAddress();
         symtab.addSymbol(Symbol((yyvsp[(2) - (4)].id), SymbolKind::Variable, ValueType::Integer, level, addr));
@@ -1620,14 +1669,15 @@ yyreduce:
 
   case 36:
 /* Line 1792 of yacc.c  */
-#line 152 "l25.y"
+#line 187 "l25.y"
     {
+
     }
     break;
 
   case 42:
 /* Line 1792 of yacc.c  */
-#line 169 "l25.y"
+#line 205 "l25.y"
     {
         printf("While stmt\n");
     }
@@ -1635,7 +1685,7 @@ yyreduce:
 
   case 43:
 /* Line 1792 of yacc.c  */
-#line 176 "l25.y"
+#line 212 "l25.y"
     {
         printf("Input stmt\n");
     }
@@ -1643,7 +1693,7 @@ yyreduce:
 
   case 44:
 /* Line 1792 of yacc.c  */
-#line 183 "l25.y"
+#line 219 "l25.y"
     {
         code.push_back(Instruction(opr, 0, 15));
     }
@@ -1651,7 +1701,7 @@ yyreduce:
 
   case 45:
 /* Line 1792 of yacc.c  */
-#line 190 "l25.y"
+#line 226 "l25.y"
     {
         printf("Function call: %s\n", (yyvsp[(1) - (4)].id));
     }
@@ -1659,7 +1709,7 @@ yyreduce:
 
   case 46:
 /* Line 1792 of yacc.c  */
-#line 194 "l25.y"
+#line 230 "l25.y"
     {
         printf("Function call (no args): %s\n", (yyvsp[(1) - (3)].id));
     }
@@ -1667,7 +1717,7 @@ yyreduce:
 
   case 49:
 /* Line 1792 of yacc.c  */
-#line 206 "l25.y"
+#line 242 "l25.y"
     {
         code.push_back(Instruction(opr, 0, 14));
     }
@@ -1675,7 +1725,7 @@ yyreduce:
 
   case 50:
 /* Line 1792 of yacc.c  */
-#line 210 "l25.y"
+#line 246 "l25.y"
     {
         code.push_back(Instruction(opr, 0, 14));
     }
@@ -1683,7 +1733,7 @@ yyreduce:
 
   case 53:
 /* Line 1792 of yacc.c  */
-#line 222 "l25.y"
+#line 258 "l25.y"
     {
         code.push_back(Instruction(opr, 0, 8));  // ==
     }
@@ -1691,7 +1741,7 @@ yyreduce:
 
   case 54:
 /* Line 1792 of yacc.c  */
-#line 226 "l25.y"
+#line 262 "l25.y"
     {
         code.push_back(Instruction(opr, 0, 9));  // !=
     }
@@ -1699,7 +1749,7 @@ yyreduce:
 
   case 55:
 /* Line 1792 of yacc.c  */
-#line 230 "l25.y"
+#line 266 "l25.y"
     {
         code.push_back(Instruction(opr, 0, 10)); // <
     }
@@ -1707,7 +1757,7 @@ yyreduce:
 
   case 56:
 /* Line 1792 of yacc.c  */
-#line 234 "l25.y"
+#line 270 "l25.y"
     {
         code.push_back(Instruction(opr, 0, 11)); // >=
     }
@@ -1715,7 +1765,7 @@ yyreduce:
 
   case 57:
 /* Line 1792 of yacc.c  */
-#line 238 "l25.y"
+#line 274 "l25.y"
     {
         code.push_back(Instruction(opr, 0, 12)); // >
     }
@@ -1723,15 +1773,23 @@ yyreduce:
 
   case 58:
 /* Line 1792 of yacc.c  */
-#line 242 "l25.y"
+#line 278 "l25.y"
     {
         code.push_back(Instruction(opr, 0, 13)); // <=
     }
     break;
 
+  case 60:
+/* Line 1792 of yacc.c  */
+#line 286 "l25.y"
+    {
+        code.push_back(Instruction(opr, 0, 1));
+    }
+    break;
+
   case 62:
 /* Line 1792 of yacc.c  */
-#line 252 "l25.y"
+#line 291 "l25.y"
     {
         code.push_back(Instruction(opr, 0, 2));  // 加法
     }
@@ -1739,7 +1797,7 @@ yyreduce:
 
   case 63:
 /* Line 1792 of yacc.c  */
-#line 256 "l25.y"
+#line 295 "l25.y"
     {
         code.push_back(Instruction(opr, 0, 3));  // 减法
     }
@@ -1747,7 +1805,7 @@ yyreduce:
 
   case 64:
 /* Line 1792 of yacc.c  */
-#line 263 "l25.y"
+#line 302 "l25.y"
     {
         code.push_back(Instruction(opr, 0, 4));  // 乘法
     }
@@ -1755,7 +1813,7 @@ yyreduce:
 
   case 65:
 /* Line 1792 of yacc.c  */
-#line 267 "l25.y"
+#line 306 "l25.y"
     {
         code.push_back(Instruction(opr, 0, 5));  // 除法
     }
@@ -1763,19 +1821,37 @@ yyreduce:
 
   case 68:
 /* Line 1792 of yacc.c  */
-#line 275 "l25.y"
+#line 314 "l25.y"
     { printf("Struct member access: %s.%s\n", (yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].id)); }
     break;
 
   case 69:
 /* Line 1792 of yacc.c  */
-#line 276 "l25.y"
-    { printf("Array access: %s[...]\n", (yyvsp[(1) - (4)].id)); }
+#line 316 "l25.y"
+    {
+        Symbol* sym = symtab.findSymbol((yyvsp[(1) - (4)].id));
+        if (!sym) {
+            fprintf(stderr, "未定义的数组变量: %s\n", (yyvsp[(1) - (4)].id));
+            exit(1);
+        }
+        if (sym->kind != SymbolKind::ARRAY) {
+            fprintf(stderr, "变量 %s 不是数组类型\n", (yyvsp[(1) - (4)].id));
+            exit(1);
+        }
+        // 生成数组访问的 p-code
+        // 假设 expr 的结果已经在栈顶
+        // 加载数组基地址
+        code.push_back(Instruction(lit, 0, sym->address));
+        // 加上索引
+        code.push_back(Instruction(opr, 0, 2)); // 加法
+        // 加载数组元素的值
+        code.push_back(Instruction(lod, sym->level, 6));
+    }
     break;
 
   case 70:
 /* Line 1792 of yacc.c  */
-#line 278 "l25.y"
+#line 336 "l25.y"
     {
         code.push_back(Instruction(lit, 0, (yyvsp[(1) - (1)].num)));
     }
@@ -1783,7 +1859,7 @@ yyreduce:
 
   case 73:
 /* Line 1792 of yacc.c  */
-#line 287 "l25.y"
+#line 345 "l25.y"
     {
         symtab.enterScope();
         symtab.resetAddress();
@@ -1794,7 +1870,7 @@ yyreduce:
 
   case 74:
 /* Line 1792 of yacc.c  */
-#line 295 "l25.y"
+#line 353 "l25.y"
     {
         int localSize = symtab.getCurrentOffset(); // 获取当前作用域变量个数
         code[blockStartIndex].a = localSize;
@@ -1804,7 +1880,7 @@ yyreduce:
 
 
 /* Line 1792 of yacc.c  */
-#line 1808 "l25.tab.cpp"
+#line 1884 "l25.tab.cpp"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2036,7 +2112,7 @@ yyreturn:
 
 
 /* Line 2055 of yacc.c  */
-#line 302 "l25.y"
+#line 360 "l25.y"
 
 extern FILE *yyin;  // 声明 Flex 的输入流变量
 
