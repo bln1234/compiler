@@ -321,7 +321,7 @@ factor:
             exit(1);
         }
         // 生成数组访问的 p-code
-        // 假设 expr 的结果已经在栈顶
+        // expr 的结果已经在栈顶
         // 加载数组基地址
         code.push_back(Instruction(lit, 0, sym->address));
         // 加上索引
