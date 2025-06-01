@@ -21,11 +21,11 @@ int addressOffset = 0;  // 当前作用域内的偏移地址
 %union {
     int num;
     char *id;
-    char *str;
+    std::string* str;
     std::vector<int>* numlist;
 }
 %type <numlist> number_list
-%type <num> expr factor term
+
 %token <num> NUMBER
 %token <id> IDENT
 %token PROGRAM FUNC MAIN RETURN LET IF ELSE WHILE INPUT OUTPUT STRUCT_DEF STRUCT
@@ -183,14 +183,54 @@ declare_stmt:
     ;
 
 assign_stmt:
-    lvalue ASSIGN expr
+    IDENT ASSIGN expr
+    {
+        Symbol* sym = symtab.findSymbol($1);
+        if (!sym) {
+            fprintf(stderr, "Undefined Variable: %s\n", $1);
+            exit(1);
+        }
+        if (sym->kind != SymbolKind::Variable) {
+            fprintf(stderr, "%s is noy Variable\n", $1);
+            exit(1);
+        }
+
+        // expr 的值已在栈顶
+        // 将其存储到变量地址
+        code.push_back(Instruction(sto, level - sym->level, sym->address));
+    }
+    | IDENT DOT IDENT ASSIGN expr
+    {   
+    }
+    | IDENT LBRACKET expr RBRACKET ASSIGN expr
+    {
+        Symbol* sym = symtab.findSymbol($1);
+        if (!sym) {
+            fprintf(stderr, "Undefined Array: %s\n", $1);
+            exit(1);
+        }
+        if (sym->kind != SymbolKind::ARRAY) {
+            fprintf(stderr, "%s is not Array\n", $1);
+            exit(1);
+        }
+
+        // 两个 expr：前一个是索引，后一个是值
+        // 它们的值会依次在栈上（值在顶，索引在次顶）
+
+        // 先交换栈顶两个元素，使得栈顶是索引，次顶是值
+        code.push_back(Instruction(opr, 0, 17)); // opr 20 是 swap
+
+        // 加载基址
+        code.push_back(Instruction(lit, 0, sym->address));
+
+        // 加上索引
+        code.push_back(Instruction(opr, 0, 2));  // 加法
+
+        // 存储到目标地址（数组[i] = val）
+        code.push_back(Instruction(stoi, 0, 0)); // 假设 `stoi` 表示间接存储指令
+    }
     ;
 
-lvalue:
-    IDENT
-    | IDENT DOT IDENT
-    | IDENT LBRACKET expr RBRACKET
-    ;
 
 if_stmt:
     IF LPAREN bool_expr RPAREN block
@@ -308,6 +348,14 @@ term:
 
 factor:
     IDENT
+    {
+        Symbol* sym = symtab.findSymbol($1);
+        if(!sym) {
+            fprintf(stderr, "Undefined Variable: %s\n", $1);
+            exit(1);
+        }
+        code.push_back(Instruction(lod, sym->level, sym->address));
+    }
     | IDENT DOT IDENT                          { printf("Struct member access: %s.%s\n", $1, $3); }
     | IDENT LBRACKET expr RBRACKET
     {
@@ -325,9 +373,9 @@ factor:
         // 加载数组基地址
         code.push_back(Instruction(lit, 0, sym->address));
         // 加上索引
-        code.push_back(Instruction(opr, 0, 2)); // 加法
+        code.push_back(Instruction(opr, 0, 2));
         // 加载数组元素的值
-        code.push_back(Instruction(lod, sym->level, 0));
+        code.push_back(Instruction(ind, 0, 0));
     }
     | NUMBER
     {
@@ -371,6 +419,8 @@ std::string getFctName(Fct f) {
         case ini: return "ini";
         case jmp: return "jmp";
         case jpc: return "jpc";
+        case ind: return "ind";
+        case stoi: return "stoi";
         default: return "???";
     }
 }
@@ -404,5 +454,7 @@ int main(int argc, char **argv) {
     vm.interpret(fout);
     fclose(input);
     fclose(output);
+    std::ofstream symout("symtable.txt");
+    symtab.dump(symout);
     return 0;
 }

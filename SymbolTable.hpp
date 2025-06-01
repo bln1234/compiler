@@ -6,10 +6,11 @@
 #include <utility>
 #include <algorithm>
 #include <cstdio>
+#include <iostream>
 #include <cstdlib>
 
 enum class SymbolKind { Variable, Function, Struct, ARRAY };
-enum class ValueType { Integer, String, StructType, Array };
+enum class ValueType { Integer, StructType, Array };
 
 struct Symbol {
     std::string name;
@@ -46,7 +47,7 @@ public:
     int allocateAddress();
     int getCurrentOffset();
     void resetAddress();
-    void dump();
+    void dump(std::ostream& out);
 
 private:
     std::vector<Symbol> symbols;

@@ -1,6 +1,7 @@
 %option nounput
 %{
 #include <cstdio>
+#include <string>
 #include <vector>
 #include "l25.tab.hpp"
 %}

@@ -63,18 +63,21 @@ void SymbolTable::resetAddress() {
     nextAddress = 0;
 }
 
-void SymbolTable::dump() {
-    printf("===== 符号表 DUMP =====\n");
+void SymbolTable::dump(std::ostream& out) {
+    out << "===== 符号表 DUMP =====" << std::endl;
     for (const auto& s : symbols) {
-        printf("Name: %s, Kind: %d, Type: %d, Level: %d, Addr: %d\n",
-            s.name.c_str(), (int)s.kind, (int)s.type, s.level, s.address);
+        out << "Name: " << s.name
+            << ", Kind: " << static_cast<int>(s.kind)
+            << ", Type: " << static_cast<int>(s.type)
+            << ", Level: " << s.level
+            << ", Addr: " << s.address << std::endl;
     }
     for (const auto& st : structs) {
-        printf("Struct: %s {\n", st.name.c_str());
+        out << "Struct: " << st.name << " {" << std::endl;
         for (const auto& field : st.fields) {
-            printf("  %s: %d\n", field.first.c_str(), (int)field.second);
+            out << "  " << field.first << ": " << static_cast<int>(field.second) << std::endl;
         }
-        printf("}\n");
+        out << "}" << std::endl;
     }
-    printf("========================\n");
+    out << "========================" << std::endl;
 }

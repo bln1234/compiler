@@ -12,7 +12,7 @@ int VM::base(int l, int b) {
 }
 
 void VM::interpret(std::ostream& out) {
-    int p = 0, b = 1, t = 0;
+    int p = 0, b = 1, t = 0, swap;
     out << "Start pl0\n";
     s[0] = 0; s[1] = 0; s[2] = 0; s[3] = 0;
 
@@ -87,6 +87,10 @@ void VM::interpret(std::ostream& out) {
                         std::cin >> input;
                         s[++t] = input;
                         break;
+                    case 17: /* 交换栈顶的两个元素*/
+                        swap = s[t];
+                        s[t - 1] = swap;
+                        s[t] = s[t - 1];
                 }
                 break;
             case lod:
@@ -110,6 +114,13 @@ void VM::interpret(std::ostream& out) {
                 break;
             case jpc:
                 if (s[t--] == 0) p = i.a;
+                break;
+            case ind:
+                s[t] = s[s[t]];
+                break;
+            case stoi:
+                s[s[t]] = s[t - 1];
+                t = t - 2;
                 break;
         }
     } while (p != 0);

@@ -5,7 +5,7 @@
 #include <iostream>
 
 enum Fct {
-    lit, opr, lod, sto, cal, ini, jmp, jpc
+    lit, opr, lod, sto, cal, ini, jmp, jpc, ind, stoi
 };
 
 struct Instruction {

@@ -92,7 +92,7 @@ typedef union YYSTYPE
 
     int num;
     char *id;
-    char *str;
+    std::string* str;
     std::vector<int>* numlist;
 
 

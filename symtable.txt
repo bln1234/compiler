@@ -1,0 +1,4 @@
+===== 符号表 DUMP =====
+Name: a, Kind: 0, Type: 0, Level: 0, Addr: 0
+Name: b, Kind: 3, Type: 0, Level: 0, Addr: 1
+========================
